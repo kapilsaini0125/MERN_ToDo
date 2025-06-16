@@ -35,6 +35,23 @@ app.get('/api/todos', async (req, res) => {
   }
 });
 
+app.get('/api/todos/search', async (req, res) => {
+  try {
+    const searchText = req.query.q;
+    if (!searchText) {
+      return res.status(400).json({ error: 'Search query is required' });
+    }
+    
+    const todos = await Todo.find({
+      text: { $regex: searchText, $options: 'i' }
+    });
+    
+    res.json(todos);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/todos', async (req, res) => {
   try {
     const todo = new Todo({
