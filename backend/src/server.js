@@ -7,11 +7,9 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection
 try {
   await mongoose.connect("mongodb+srv://kapilsaini0125:SK0imtnncsqV6Qdr@cluster0.9uirnqe.mongodb.net/notes_db?retryWrites=true&w=majority&appName=Cluster0");
   console.log('Connected to MongoDB');
@@ -19,13 +17,12 @@ try {
   console.error('MongoDB connection error:', err);
 }
 
-// Todo Model
 const Todo = mongoose.model('Todo', {
   text: String,
   completed: Boolean
 });
 
-// Routes
+
 app.get('/api/todos', async (req, res) => {
   try {
     const todos = await Todo.find();
@@ -35,11 +32,11 @@ app.get('/api/todos', async (req, res) => {
   }
 });
 
-app.get('/api/todos/search', async (req, res) => {
+app.get('/api/todos/searchToDo', async (req, res) => {
   try {
     const searchText = req.query.q;
     if (!searchText) {
-      return res.status(400).json({ error: 'Search query is required' });
+      return res.status(400).json({ error: 'query require' });
     }
     
     const todos = await Todo.find({
@@ -93,13 +90,13 @@ app.delete('/api/todos/:id', async (req, res) => {
   }
 });
 
-// Error handling middleware
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Start Server
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

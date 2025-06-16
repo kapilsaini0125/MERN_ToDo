@@ -45,7 +45,7 @@ function App() {
     }
     
     try {
-      const response = await axios.get('http://localhost:5000/api/todos/search', {
+      const response = await axios.get('http://localhost:5000/api/todos/searchToDo', {
         params: { q: searchText }
       })
       setTodos(response.data)
@@ -82,7 +82,7 @@ function App() {
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">ToDo List</h1>
       
-      {/* Search Section */}
+      
       <div className="flex mb-4">
         <input
           type="text"
@@ -100,7 +100,7 @@ function App() {
         </button>
       </div>
       
-      {/* Add Todo Section */}
+      
       <div className="flex mb-4">
         <input
           type="text"
@@ -117,8 +117,7 @@ function App() {
           Add
         </button>
       </div>
-      
-      {/* Todo List */}
+    
       <ul className="space-y-2">
         {todos.length === 0 ? (
           <li className="p-3 text-center text-gray-500">No todos found</li>
