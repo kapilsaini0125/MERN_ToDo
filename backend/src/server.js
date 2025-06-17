@@ -28,6 +28,7 @@ const Todo = mongoose.model('Todo', {
 app.get('/api/todos', async (req, res) => {
   try {
     const todos = await Todo.find();
+    console.log(todos);
     res.json(todos);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -37,9 +38,9 @@ app.get('/api/todos', async (req, res) => {
 
 app.get('/api/todos/completed', async (req, res) => {
   try {
-    const completedTodos = await Todo.find({ completed: true });
-    
-    res.json(completedTodos);
+    const allTodo = await Todo.find();
+    const completedTodo =allTodo.filter({completed: true});
+    res.json(completedTodo);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
