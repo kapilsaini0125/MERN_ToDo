@@ -8,7 +8,7 @@ function App() {
   const [todos, setTodos] = useState([])
   const [text, setText] = useState('')
   const [searchText, setSearchText] = useState('')
-
+  
   useEffect(() => {
     fetchTodos()
   }, [])
@@ -19,6 +19,15 @@ function App() {
       setTodos(response.data)
     } catch (error) {
       toast.error('Failed to fetch todos')
+    }
+  }
+
+  const fetchCompletedTodos = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/todos/completed')
+      setTodos(response.data)
+    } catch (error) {
+      toast.error('Failed to fetch completed todos')
     }
   }
 
@@ -53,6 +62,8 @@ function App() {
       toast.error('Failed to search todos')
     }
   }
+
+  
 
   const toggleTodo = async (id) => {
     try {
@@ -99,8 +110,7 @@ function App() {
           <FaSearch />
         </button>
       </div>
-      
-      
+
       <div className="flex mb-4">
         <input
           type="text"
@@ -118,6 +128,15 @@ function App() {
         </button>
       </div>
     
+    <div className="flex mb-4">
+        
+        <button 
+          onClick={fetchCompletedTodos}
+          className=" text-white p-2 rounded "
+        >
+          Completed
+        </button>
+      </div>
       <ul className="space-y-2">
         {todos.length === 0 ? (
           <li className="p-3 text-center text-gray-500">No todos found</li>
