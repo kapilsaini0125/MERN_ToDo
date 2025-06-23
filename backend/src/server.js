@@ -24,6 +24,27 @@ const Todo = mongoose.model('Todo', {
   completed: Boolean
 });
 
+const Account= mongoose.model('Account',{
+  text: String,
+  password: String
+});
+
+app.post('/api/todos/signup',(req, res) => {
+const a= req.body.name
+const b= req.body.password
+  try{
+  const user= new Account({
+  text: a,
+  password: b
+})
+user.save();
+res.status(201).json(user);
+
+} catch(error){
+        console.error(error);
+}
+})
+
 
 app.get('/api/todos', async (req, res) => {
   try {
@@ -78,6 +99,26 @@ app.post('/api/todos', async (req, res) => {
   }
 });
 
+app.put('/api/todos/:id', async (req, res) => {
+  try {
+    
+    const {updateText} = req.body;
+    
+    const todo = await Todo.filter(
+      todos => todos._id === req.params.id 
+    )
+    
+    if (!todo) {
+      return res.status(404).json({ error: 'Todo not found' });
+    }
+
+   todo.Text= {updateText};
+   res.json(todo);
+   
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
 
 app.put('/api/todos/:id', async (req, res) => {
   try {

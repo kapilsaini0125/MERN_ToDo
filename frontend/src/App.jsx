@@ -5,14 +5,38 @@ import { FaTrash, FaCheck, FaSearch } from 'react-icons/fa'
 import './App.css'
 
 function App() {
+
+   const [isSignup, setIsSignup] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    password: ''
+  });
+  
   const [todos, setTodos] = useState([])
   const [text, setText] = useState('')
   const [searchText, setSearchText] = useState('')
-  
-  useEffect(() => {
-    fetchTodos()
-  }, [])
+  const [updateText, setUpdateText] = useState('')
+const [editID, setEditId] = useState('')
 
+
+  useEffect(() => {
+    if (isSignup) {
+      fetchTodos();
+    }
+  }, [isSignup]);
+
+
+  const handleSignup = async (e) => {
+    e.preventDefault(); //  to prevent page reload
+      toast.success('Entering Backend!');
+
+      await axios.post('http://localhost:5000/api/todos/signup', formData)
+      toast.success('Account created successfully!');
+
+      setIsSignup(true);
+    
+  };
+ 
   const fetchTodos = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/todos')
@@ -26,6 +50,23 @@ function App() {
     try {
       const response = await axios.get('http://localhost:5000/api/todos/completed')
       setTodos(response.data)
+    } catch (error) {
+      toast.error('Failed to fetch completed todos')
+    }
+  }
+
+  const updateTodo = async (id, updateText) => {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/todos/${id}`, {
+        text: updateText
+      })
+       setTodos(prevTodos => 
+      prevTodos.map(todo => 
+        todo._id === id ? response.data : todo
+      )
+    );
+     toast.success('Todo updated');
+ 
     } catch (error) {
       toast.error('Failed to fetch completed todos')
     }
@@ -63,13 +104,11 @@ function App() {
     }
   }
 
-  
-
   const toggleTodo = async (id) => {
     try {
       const todo = todos.find(t => t._id === id)
       const response = await axios.put(`http://localhost:5000/api/todos/${id}`, {
-        completed: !todo.completed
+        completed: !completed
       })
       setTodos(todos.map(t => t._id === id ? response.data : t))
       toast.success('Todo updated')
@@ -86,6 +125,56 @@ function App() {
     } catch (error) {
       toast.error('Failed to delete todo')
     }
+  }
+
+
+   if (!isSignup) {
+    return (
+      <div className="container mx-auto p-4 max-w-md">
+       
+        <div className="container mx-auto p-4 max-w-md">
+        <Toaster position="top-right" />
+        <h1 className="text-2xl font-bold mb-4">Signup page</h1>
+        <form onSubmit={handleSignup} className="space-y-4">
+            <div>
+              <label className="block mb-1">Name:</label>
+              <input
+                type="text"
+                value={formData.name}
+                
+                onChange={(e) => setFormData({
+                  ...formData,
+                  name: e.target.value
+                })}
+                className="w-full p-2 border rounded"
+                required
+              />
+              
+            </div>
+            <div>
+              <label className="block mb-1">Password:</label>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  password: e.target.value
+                })}
+                className="w-full p-2 border rounded"
+                required
+                minLength="6"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition"
+            >
+              Sign Up
+            </button>
+          </form>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -137,6 +226,9 @@ function App() {
           Completed
         </button>
       </div>
+
+      
+
       <ul className="space-y-2">
         {todos.length === 0 ? (
           <li className="p-3 text-center text-gray-500">No todos found</li>
@@ -146,19 +238,30 @@ function App() {
               key={todo._id} 
               className={`flex items-center p-3 border rounded ${todo.completed ? 'bg-gray-100' : 'bg-white'}`}
             >
-              <span 
-                className={`flex-1 cursor-pointer ${todo.completed ? 'line-through text-gray-500' : ''}`}
-                onClick={() => toggleTodo(todo._id)}
-              >
                 {todo.text}
-              </span>
-              <div className="flex space-x-2">
+                {editID === todo._id  ? (
+                   <input
+          type="text"
+          value={updateText}
+          onChange={(e) => setUpdateText(e.target.value)}
+          placeholder="Add task to update..."
+          className="flex-1 p-2 border rounded-l"
+          onKeyPress={(e) => e.key === 'Enter' && updateTodo(todo._id, updateText)}
+        />
+                ):(
+                   
+              
+              <div className="flex space-x-4">
                 <button
                   onClick={() => toggleTodo(todo._id)}
                   className={`p-1 rounded ${todo.completed ? 'bg-green-500' : 'bg-gray-300'} text-white`}
                 >
                   <FaCheck />
                 </button>
+                 <button 
+                 onClick= {() => setEditId(todo._id)}
+                 >Update</button>
+                 
                 <button
                   onClick={() => deleteTodo(todo._id)}
                   className="p-1 bg-red-500 text-white rounded hover:bg-red-600"
@@ -166,11 +269,15 @@ function App() {
                   <FaTrash />
                 </button>
               </div>
+                )}
             </li>
           ))
         )}
       </ul>
+      
     </div>
+
+    
   )
 }
 
