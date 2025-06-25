@@ -25,6 +25,13 @@ const [editID, setEditId] = useState('')
     }
   }, [isSignup]);
 
+  const handleLogIn = async () => {
+  try {
+    
+  } catch (error) {
+    
+  }
+  }
 
   const handleSignup = async (e) => {
     e.preventDefault(); //  to prevent page reload
@@ -167,6 +174,11 @@ const [editID, setEditId] = useState('')
             </div>
             <button
               type="submit"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition"
+            >
+              Login...
+            </button>
+            <button onClick= {handleLogIn}
               className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition"
             >
               Sign Up
