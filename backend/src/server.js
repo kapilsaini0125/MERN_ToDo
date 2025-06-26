@@ -21,35 +21,64 @@ try {
 
 const Todo = mongoose.model('Todo', {
   text: String,
-  completed: Boolean
+  completed: Boolean,
+  userName: String
 });
 
-const Account= mongoose.model('Account',{
-  text: String,
-  password: String
-});
 
-app.post('/api/todos/signup',(req, res) => {
-const a= req.body.name
-const b= req.body.password
+
+app.post('/api/todos/login', async (req, res) => {
+  
+  const {formData}= req.body;
+  
+  if(!formData ){
+    res.json({success: false, error: "Details require"})
+  }
+
   try{
-  const user= new Account({
-  text: a,
-  password: b
-})
-user.save();
-res.status(201).json(user);
+  const logInUser= await Todo.findOne({
+   formData
+  });
+  
+  if(!logInUser){
+    res.json({success: false, error: "Invalid details"} );
+    console.log("user not match");
+  }
+
+res.json(logInUser.userName);
 
 } catch(error){
-        console.error(error);
+        res.json({success: false, error: "Server Error"});
 }
-})
+});
+
+app.post('/api/todos/signup', async (req, res) => {
+  
+  const {formData}= req.body
+ try {
+   const signUpUser= new Todo({
+    userName: formData,
+    text: '',
+    completed: false,
+  
+   })
+   await signUpUser.save();
+   res.status(201).json({
+    userName: signUpUser.userName,
+   });
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 
 app.get('/api/todos', async (req, res) => {
   try {
-    const todos = await Todo.find();
-    console.log(todos);
+    const {todoUser} = req.query;
+    const todos = await Todo.find(
+      todoUser, 
+      {text: 1, completed: 1}
+    );
     res.json(todos);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -90,7 +119,8 @@ app.post('/api/todos', async (req, res) => {
   try {
     const todo = new Todo({
       text: req.body.text,
-      completed: false
+      completed: false,
+      userName: req.body.userName
     });
     await todo.save();
     res.status(201).json(todo);

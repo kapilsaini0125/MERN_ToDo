@@ -6,47 +6,64 @@ import './App.css'
 
 function App() {
 
-   const [isSignup, setIsSignup] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    password: ''
-  });
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [formData, setFormData] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+
   
   const [todos, setTodos] = useState([])
   const [text, setText] = useState('')
   const [searchText, setSearchText] = useState('')
   const [updateText, setUpdateText] = useState('')
-const [editID, setEditId] = useState('')
-
+  const [editID, setEditId] = useState('')
+  
 
   useEffect(() => {
-    if (isSignup) {
-      fetchTodos();
-    }
-  }, [isSignup]);
+  
+  }, [isSignUp]);
 
-  const handleLogIn = async () => {
-  try {
+  const handleSignUp = async (e) => {
+        e.preventDefault();
+       try {
+        
+       const signUp= await axios.post('http://localhost:5000/api/todos/signup',{formData});
     
-  } catch (error) {
-    
-  }
+       setCurrentUser({userName: signUp.data.userName});
+         setIsSignUp(true);
+        } catch (error) {
+        console.log(error);
+       }
   }
 
-  const handleSignup = async (e) => {
+  const handleLogIn = async (e) => {
+     toast.success("frontend login");
+     
     e.preventDefault(); //  to prevent page reload
-      toast.success('Entering Backend!');
-
-      await axios.post('http://localhost:5000/api/todos/signup', formData)
-      toast.success('Account created successfully!');
-
-      setIsSignup(true);
+      
+      try{
+        const findUser = await axios.post('http://localhost:5000/api/todos/login', 
+                { formData}
+          )
+      
+      if(findUser.data.success)
+      {
+       setCurrentUser({userName: findUser.data.userName});
+       fetchTodos(findUser.data.userName);
+       setIsSignUp(true)
+      }else{
+        toast.success("frontend else block");
+      }
+    }catch(error){
+          toast.error(error);
+    }
     
   };
  
-  const fetchTodos = async () => {
+  const fetchTodos = async (todoUser) => {
     try {
-      const response = await axios.get('http://localhost:5000/api/todos')
+      const response = await axios.get('http://localhost:5000/api/todos',{
+        params: {todoUser}
+      })
       setTodos(response.data)
     } catch (error) {
       toast.error('Failed to fetch todos')
@@ -79,14 +96,17 @@ const [editID, setEditId] = useState('')
     }
   }
 
-  const addTodo = async () => {
+  const addTodo = async ({userName}) => {
     if (!text.trim()) {
       toast.error('Todo text cannot be empty')
       return
     }
     
     try {
-      const response = await axios.post('http://localhost:5000/api/todos', { text })
+      const response = await axios.post('http://localhost:5000/api/todos', { 
+        text, 
+        userName
+       })
       setTodos([...todos, response.data])
       setText('')
       toast.success('Todo added successfully')
@@ -133,56 +153,37 @@ const [editID, setEditId] = useState('')
       toast.error('Failed to delete todo')
     }
   }
-
-
-   if (!isSignup) {
+  
+  if (!isSignUp) {
     return (
       <div className="container mx-auto p-4 max-w-md">
        
         <div className="container mx-auto p-4 max-w-md">
         <Toaster position="top-right" />
         <h1 className="text-2xl font-bold mb-4">Signup page</h1>
-        <form onSubmit={handleSignup} className="space-y-4">
+        <form onSubmit={handleSignUp} className="space-y-4">
             <div>
               <label className="block mb-1">Name:</label>
               <input
                 type="text"
-                value={formData.name}
-                
-                onChange={(e) => setFormData({
-                  ...formData,
-                  name: e.target.value
-                })}
+                value={formData}
+                onChange={(e) => setFormData( e.target.value)}
                 className="w-full p-2 border rounded"
                 required
               />
               
             </div>
-            <div>
-              <label className="block mb-1">Password:</label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  password: e.target.value
-                })}
-                className="w-full p-2 border rounded"
-                required
-                minLength="6"
-              />
-            </div>
+            
             <button
               type="submit"
               className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition"
             >
-              Login...
-            </button>
-            <button onClick= {handleLogIn}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition"
-            >
               Sign Up
             </button>
+            <button
+            onClick= {handleLogIn}
+            >Have An Account</button>
+            
           </form>
         </div>
       </div>
@@ -191,6 +192,7 @@ const [editID, setEditId] = useState('')
 
   return (
     <div className="container mx-auto p-4 max-w-md">
+      
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">ToDo List</h1>
       
@@ -219,7 +221,7 @@ const [editID, setEditId] = useState('')
           onChange={(e) => setText(e.target.value)}
           placeholder="Add a new task..."
           className="flex-1 p-2 border rounded-l"
-          onKeyPress={(e) => e.key === 'Enter' && addTodo()}
+          onKeyPress={(e) => e.key === 'Enter' && addTodo({userName})}
         />
         <button 
           onClick={addTodo}
@@ -286,11 +288,11 @@ const [editID, setEditId] = useState('')
           ))
         )}
       </ul>
-      
-    </div>
 
+    </div>
+      
     
-  )
+  );
 }
 
 export default App
