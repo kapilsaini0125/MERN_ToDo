@@ -36,16 +36,16 @@ app.post('/api/todos/login', async (req, res) => {
   }
 
   try{
-  const logInUser= await Todo.findOne({
-   formData
-  });
+  const logInUser= await Todo.findOne(
+    {userName: formData}
+  );
   
   if(!logInUser){
     res.json({success: false, error: "Invalid details"} );
     console.log("user not match");
   }
 
-res.json(logInUser.userName);
+res.json(logInUser);
 
 } catch(error){
         res.json({success: false, error: "Server Error"});
@@ -54,18 +54,22 @@ res.json(logInUser.userName);
 
 app.post('/api/todos/signup', async (req, res) => {
   
-  const {formData}= req.body
+  const formData = req.body
+  
+   
  try {
    const signUpUser= new Todo({
-    userName: formData,
+   
+    formData,
     text: '',
     completed: false,
-  
+     
    })
    await signUpUser.save();
-   res.status(201).json({
-    userName: signUpUser.userName,
-   });
+   console.log(signUpUser);
+   res.status(201).json(
+    signUpUser
+   );
   } catch (error) {
     console.log(error);
   }
@@ -80,6 +84,7 @@ app.get('/api/todos', async (req, res) => {
       {text: 1, completed: 1}
     );
     res.json(todos);
+    //console.log(todos);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

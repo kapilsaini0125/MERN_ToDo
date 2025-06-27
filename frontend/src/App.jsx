@@ -7,7 +7,7 @@ import './App.css'
 function App() {
 
   const [isSignUp, setIsSignUp] = useState(false);
-  const [formData, setFormData] = useState('');
+  const [formData, setFormData] = useState({name: ''});
   const [currentUser, setCurrentUser] = useState(null);
 
   
@@ -26,9 +26,9 @@ function App() {
         e.preventDefault();
        try {
         
-       const signUp= await axios.post('http://localhost:5000/api/todos/signup',{formData});
+       const signUp= await axios.post('http://localhost:5000/api/todos/signup', formData.name);
     
-       setCurrentUser({userName: signUp.data.userName});
+       setCurrentUser(signUp.data.userName);
          setIsSignUp(true);
         } catch (error) {
         console.log(error);
@@ -36,19 +36,19 @@ function App() {
   }
 
   const handleLogIn = async (e) => {
-     toast.success("frontend login");
-     
+    
     e.preventDefault(); //  to prevent page reload
       
       try{
+        
         const findUser = await axios.post('http://localhost:5000/api/todos/login', 
-                { formData}
+               { name: formData}
           )
-      
-      if(findUser.data.success)
+       
+      if(findUser)
       {
-       setCurrentUser({userName: findUser.data.userName});
-       fetchTodos(findUser.data.userName);
+       setCurrentUser(findUser.userName);
+       fetchTodos(currentUser);
        setIsSignUp(true)
       }else{
         toast.success("frontend else block");
@@ -166,8 +166,8 @@ function App() {
               <label className="block mb-1">Name:</label>
               <input
                 type="text"
-                value={formData}
-                onChange={(e) => setFormData( e.target.value)}
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name:  e.target.value})}
                 className="w-full p-2 border rounded"
                 required
               />
