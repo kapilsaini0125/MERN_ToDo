@@ -25,51 +25,57 @@ const Todo = mongoose.model('Todo', {
   userName: String
 });
 
+const Account = mongoose.model('Account', {
+  userName: String
+}) 
 
 
-app.post('/api/todos/login', async (req, res) => {
-  
-  const {formData}= req.body;
+app.post('/api/todos/account/login', async (req, res) => {
+  console.log("on login")
+  const formData= req.body.name;
+  console.log(formData)
   
   if(!formData ){
     res.json({success: false, error: "Details require"})
   }
 
   try{
-  const logInUser= await Todo.findOne(
+  const logInUser= await Account.findOne(
     {userName: formData}
   );
-  
+  console.log(logInUser)
   if(!logInUser){
     res.json({success: false, error: "Invalid details"} );
     console.log("user not match");
   }
 
-res.json(logInUser);
+res.json({id: logInUser._id});
+console.log("sending id to frontend"); 
 
 } catch(error){
         res.json({success: false, error: "Server Error"});
 }
 });
 
-app.post('/api/todos/signup', async (req, res) => {
+app.post('/api/todos/account/signup', async (req, res) => {
+   console.log("on signup endpoint");
+  //req.body now able to parasing the sended formData 
+  //by app.use(express.json()) -> it allows to handel object-format-data between frontend-backend
+  //for transferring simple string we have to use app.use(express.text()) 
   
-  const formData = req.body
-  
-   
+  const formData = req.body.username// here it storing only string from frontend (res.body.username)
+  //const formData = req.body -> here it is storing an object fromate from the res.body
+
  try {
-   const signUpUser= new Todo({
-   
-    formData,
-    text: '',
-    completed: false,
-     
+   const signUpUser= new Account({
+    userName: formData
    })
+   console.log(signUpUser)
    await signUpUser.save();
-   console.log(signUpUser);
-   res.status(201).json(
-    signUpUser
-   );
+  res.json({id: signUpUser._id,
+    userName: signUpUser.userName
+  });
+   console.log("user_id sending to frontend")
   } catch (error) {
     console.log(error);
   }
@@ -78,13 +84,16 @@ app.post('/api/todos/signup', async (req, res) => {
 
 app.get('/api/todos', async (req, res) => {
   try {
-    const {todoUser} = req.query;
+    console.log("fetching user_id todo")
+    
+    
     const todos = await Todo.find(
-      todoUser, 
-      {text: 1, completed: 1}
+      {userName:  req.query.id}, 
+     
     );
+    console.log(todos);
     res.json(todos);
-    //console.log(todos);
+    
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -121,12 +130,19 @@ app.get('/api/todos/searchToDo', async (req, res) => {
 
 
 app.post('/api/todos', async (req, res) => {
+  const { userText, username } = req.body;
+  
+  if (!username) {
+    return res.status(400).json({ error: 'User not authenticated' });
+  }
+
   try {
     const todo = new Todo({
-      text: req.body.text,
+      text: userText,
       completed: false,
-      userName: req.body.userName
+      userName: username 
     });
+    
     await todo.save();
     res.status(201).json(todo);
   } catch (err) {

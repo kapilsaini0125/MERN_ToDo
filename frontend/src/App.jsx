@@ -7,7 +7,7 @@ import './App.css'
 function App() {
 
   const [isSignUp, setIsSignUp] = useState(false);
-  const [formData, setFormData] = useState({name: ''});
+  const [formData, setFormData] = useState( '');
   const [currentUser, setCurrentUser] = useState(null);
 
   
@@ -26,9 +26,11 @@ function App() {
         e.preventDefault();
        try {
         
-       const signUp= await axios.post('http://localhost:5000/api/todos/signup', formData.name);
-    
-       setCurrentUser(signUp.data.userName);
+       const signUp= await axios.post('http://localhost:5000/api/todos/account/signup', {
+        username: formData
+        });
+        
+         setCurrentUser(signUp.data.id);
          setIsSignUp(true);
         } catch (error) {
         console.log(error);
@@ -38,31 +40,29 @@ function App() {
   const handleLogIn = async (e) => {
     
     e.preventDefault(); //  to prevent page reload
-      
+       
       try{
-        
-        const findUser = await axios.post('http://localhost:5000/api/todos/login', 
+        toast.success('login call ')
+   
+        const findUser = await axios.post('http://localhost:5000/api/todos/account/login', 
                { name: formData}
           )
-       
-      if(findUser)
-      {
-       setCurrentUser(findUser.userName);
-       fetchTodos(currentUser);
+      
+       setCurrentUser(findUser.data.id);
+       fetchTodos();
        setIsSignUp(true)
-      }else{
-        toast.success("frontend else block");
-      }
     }catch(error){
           toast.error(error);
     }
     
   };
  
-  const fetchTodos = async (todoUser) => {
+  const fetchTodos = async () => {
     try {
+      toast.success('fetching id_user')
+   
       const response = await axios.get('http://localhost:5000/api/todos',{
-        params: {todoUser}
+       params : {id: currentUser}
       })
       setTodos(response.data)
     } catch (error) {
@@ -96,17 +96,21 @@ function App() {
     }
   }
 
-  const addTodo = async ({userName}) => {
+  const addTodo = async () => {
     if (!text.trim()) {
       toast.error('Todo text cannot be empty')
       return
     }
-    
+    toast.success('Todo adding')
+
     try {
+   
       const response = await axios.post('http://localhost:5000/api/todos', { 
-        text, 
-        userName
+         userText: text,
+         username: currentUser
        })
+        toast.success('Todo adding')
+
       setTodos([...todos, response.data])
       setText('')
       toast.success('Todo added successfully')
@@ -166,8 +170,8 @@ function App() {
               <label className="block mb-1">Name:</label>
               <input
                 type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name:  e.target.value})}
+                value={formData}
+                onChange={(e) => setFormData(e.target.value)}
                 className="w-full p-2 border rounded"
                 required
               />
@@ -221,7 +225,7 @@ function App() {
           onChange={(e) => setText(e.target.value)}
           placeholder="Add a new task..."
           className="flex-1 p-2 border rounded-l"
-          onKeyPress={(e) => e.key === 'Enter' && addTodo({userName})}
+          onKeyPress={(e) => e.key === 'Enter' && addTodo()}
         />
         <button 
           onClick={addTodo}
