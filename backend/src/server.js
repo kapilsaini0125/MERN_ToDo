@@ -26,55 +26,29 @@ const Todo = mongoose.model('Todo', {
 });
 
 const Account = mongoose.model('Account', {
-  userName: String
+  userName: String,
+  userPassword: String 
 }) 
 
 
-app.post('/api/todos/account/login', async (req, res) => {
-  console.log("on login")
-  const formData= req.body.name;
-  console.log(formData)
-  
-  if(!formData ){
-    res.json({success: false, error: "Details require"})
-  }
-
-  try{
-  const logInUser= await Account.findOne(
-    {userName: formData}
-  );
-  console.log(logInUser)
-  if(!logInUser){
-    res.json({success: false, error: "Invalid details"} );
-    console.log("user not match");
-  }
-
-res.json({id: logInUser._id});
-console.log("sending id to frontend"); 
-
-} catch(error){
-        res.json({success: false, error: "Server Error"});
-}
-});
 
 app.post('/api/todos/account/signup', async (req, res) => {
    console.log("on signup endpoint");
-  //req.body now able to parasing the sended formData 
-  //by app.use(express.json()) -> it allows to handel object-format-data between frontend-backend
-  //for transferring simple string we have to use app.use(express.text()) 
-  
-  const formData = req.body.username// here it storing only string from frontend (res.body.username)
-  //const formData = req.body -> here it is storing an object fromate from the res.body
+   
+  const {name, password} = req.body
+
 
  try {
    const signUpUser= new Account({
-    userName: formData
+    userName: name,
+    userPassword: password
    })
-   console.log(signUpUser)
-   await signUpUser.save();
-  res.json({id: signUpUser._id,
-    userName: signUpUser.userName
-  });
+    await signUpUser.save();
+    console.log(signUpUser)
+    const id_ = {id: signUpUser._id}
+          
+  res.json(id_);
+
    console.log("user_id sending to frontend")
   } catch (error) {
     console.log(error);
@@ -82,13 +56,40 @@ app.post('/api/todos/account/signup', async (req, res) => {
 });
 
 
+app.post('/api/todos/account/login', async (req, res) => {
+ 
+  console.log("on login")
+  const {name, password}= req.body;//clear
+
+  try{
+  const logInUser= await Account.findOne({userPassword: password}
+  );
+  console.log("user is "+ logInUser)
+  
+  if(!logInUser){
+    console.log("user not match");
+  
+    res.json({success: false, error: "Invalid details"} );
+    }
+
+    res.json({id: logInUser._id})
+  console.log("sending id to frontend: " ); 
+} 
+catch(error){
+        res.json({success: false, error: "Server Error"});
+}
+});
+
+
+
 app.get('/api/todos', async (req, res) => {
-  try {
-    console.log("fetching user_id todo")
     
+  const {logInUser}= req.query
+     console.log(logInUser);
+  try {
     
     const todos = await Todo.find(
-      {userName:  req.query.id}, 
+      {userName: logInUser }
      
     );
     console.log(todos);
@@ -130,19 +131,19 @@ app.get('/api/todos/searchToDo', async (req, res) => {
 
 
 app.post('/api/todos', async (req, res) => {
-  const { userText, username } = req.body;
-  
+  const { usertext, username } = req.body;
+  console.log("ceating new todo")
   if (!username) {
     return res.status(400).json({ error: 'User not authenticated' });
   }
 
   try {
     const todo = new Todo({
-      text: userText,
+      text: usertext,
       completed: false,
       userName: username 
     });
-    
+    console.log(todo);
     await todo.save();
     res.status(201).json(todo);
   } catch (err) {
