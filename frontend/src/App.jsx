@@ -23,8 +23,10 @@ function App() {
   
 
   useEffect(() => {
-  
-  }, [isSignUp, isLogIn]);
+  if(isSignUp && !isLogIn){
+    fetchTodos(currentUser)
+  }
+  }, [currentUser, isLogIn]);
 
   const handleSignUp = async (e) => {
         e.preventDefault();
@@ -35,10 +37,11 @@ function App() {
         );
         const new_id= signUp.data.id;
         //not 
-         console.log(new_id);
+         //console.log(new_id);
          setCurrentUser(new_id);
-         console.log(currentUser);
+        
          setIsSignUp(true);
+        
         } catch (error) {
         console.log(error);
        }
@@ -49,38 +52,30 @@ function App() {
     e.preventDefault(); //  to prevent page reload
        
        
-
-       
       try{
         toast.success('login call ')
-   
-        const findUser = await axios.post('http://localhost:5000/api/todos/account/login', 
-                {
-                  name: formData.name,
-                  password: formData.password
+        
+        const findUser = await axios.post('http://localhost:5000/api/todos/account/login', {checkUserPassword: formData.password})
+        console.log("comeIn")
+        setIsLogIn(false);
+        setIsSignUp(true);
+        setCurrentUser(findUser.data.id);
 
-                }
-          )
-       setIsSignUp(true)
-       setIsLogIn(false);
-       setCurrentUser(findUser.data.id);
+        
 
-       // same currentuserState problem 
-       //how we can pass parameters in fetchTodo
-
-       fetchTodos();
+       
         }catch(error){
           toast.error(error)
     }
     
   };
  
-  const fetchTodos = async (findUser) => {
+  const fetchTodos = async (findUserById) => {
     try {
       toast.success('fetching id_user');
       
       const response = await axios.get('http://localhost:5000/api/todos',{
-       params : {logInUser: findUser}
+       params : {logInUser: findUserById}
       })
       setTodos(response.data)
     } catch (error) {
@@ -123,8 +118,8 @@ function App() {
     
     try {
       const response = await axios.post('http://localhost:5000/api/todos', { 
-         usertext: text,
-         password: currentUser
+         userText: text,
+         u_Id: currentUser
        })
         toast.success('Todo adding')
 
@@ -216,7 +211,10 @@ function App() {
             
           </form>
            <button
-            onClick= {handleLogIn}
+            onClick= {() => 
+             { setIsLogIn(true);
+              setIsSignUp(true);
+            }}
             >Have An Account</button>
         </div>
        
@@ -233,17 +231,7 @@ function App() {
         <Toaster position="top-right" />
         <h1 className="text-2xl font-bold mb-4">Login page</h1>
         <form onSubmit={handleLogIn} className="space-y-4">
-            <div>
-              <label className="block mb-1">Name:</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full p-2 border rounded"
-                required
-              />
-              
-            </div>
+            
             <div>
               <label className="block mb-1">Password:</label>
               <input

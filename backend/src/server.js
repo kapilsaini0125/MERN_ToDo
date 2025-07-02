@@ -22,7 +22,7 @@ try {
 const Todo = mongoose.model('Todo', {
   text: String,
   completed: Boolean,
-  userName: String
+  userId: String
 });
 
 const Account = mongoose.model('Account', {
@@ -58,13 +58,12 @@ app.post('/api/todos/account/signup', async (req, res) => {
 
 app.post('/api/todos/account/login', async (req, res) => {
  
-  console.log("on login")
-  const {name, password}= req.body;//clear
-
+  const checkUserPassword= req.body.checkUserPassword;//clear
   try{
-  const logInUser= await Account.findOne({userPassword: password}
-  );
-  console.log("user is "+ logInUser)
+    console.log("on login")
+  
+  const logInUser= await Account.findOne({userPassword: checkUserPassword});
+  console.log( logInUser)
   
   if(!logInUser){
     console.log("user not match");
@@ -84,12 +83,13 @@ catch(error){
 
 app.get('/api/todos', async (req, res) => {
     
-  const {logInUser}= req.query
-     console.log(logInUser);
+  const logInUser= req.query.logInUser
+   console.log(logInUser);
+    
   try {
     
     const todos = await Todo.find(
-      {userName: logInUser }
+      { userId: logInUser }
      
     );
     console.log(todos);
@@ -131,17 +131,17 @@ app.get('/api/todos/searchToDo', async (req, res) => {
 
 
 app.post('/api/todos', async (req, res) => {
-  const { usertext, username } = req.body;
+  const {userText, u_Id} = req.body;
   console.log("ceating new todo")
-  if (!username) {
-    return res.status(400).json({ error: 'User not authenticated' });
-  }
+  console.log(userText);
+  console.log(u_Id);
+  
 
   try {
     const todo = new Todo({
-      text: usertext,
+      text: userText,
       completed: false,
-      userName: username 
+      userId: u_Id
     });
     console.log(todo);
     await todo.save();
