@@ -7,8 +7,8 @@ import './App.css'
 
 function App() {
 
-  const [isSignUp, setIsSignUp] = useState(false)
-  const [isLogIn, setIsLogIn]= useState( false );
+  const [isSignUp, setIsSignUp] = useState(true)
+  const [isLogIn, setIsLogIn]= useState( true );
   const [currentUser, setCurrentUser]= useState(() => { 
     const currentUserState= localStorage.getItem('currentUser')
     return currentUserState != null? JSON.parse(currentUserState): null
@@ -34,7 +34,7 @@ function App() {
   console.log(currentUser)
     
     setIsLogIn(false);
-    setIsSignUp(true);
+    setIsSignUp(false);
       
   }
   if(currentUser== null){
@@ -59,9 +59,9 @@ function App() {
         const new_id= signUp.data.id;
         //not 
          //console.log(new_id);
-         setCurrentUser(new_id);
-        
-         setIsSignUp(true);
+         
+         setIsSignUp(false);
+        setCurrentUser(new_id);
         
         } catch (error) {
         console.log(error);
@@ -78,9 +78,7 @@ function App() {
         
         const findUser = await axios.post('http://localhost:5000/api/todos/account/login', {checkUserPassword: formData.password})
         console.log("comeIn")
-        setIsLogIn(false);
-        setIsSignUp(true);
-        setCurrentUser(findUser.data.id);
+         setCurrentUser(findUser.data.id);
 
        
         }catch(error){
@@ -189,7 +187,7 @@ function App() {
     }
   }
   
-  if (!isSignUp) {
+  if (isSignUp) {
     return (
       <div className="container mx-auto p-4 max-w-md">
        
@@ -231,8 +229,8 @@ function App() {
           </form>
            <button
             onClick= {() => 
-             { setIsLogIn(true);
-              setIsSignUp(true);
+             { 
+              setIsSignUp(false);
             }}
             >Have An Account</button>
         </div>
@@ -318,8 +316,8 @@ function App() {
         </button>
       </div>
       <button  onClick= {() => 
-             { setIsLogIn(true);
-              setIsSignUp(false);
+             { 
+              setIsSignUp(true)
               setCurrentUser(null);
               localStorage.removeItem('currentUser');
               
