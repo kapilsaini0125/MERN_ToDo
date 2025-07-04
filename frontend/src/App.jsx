@@ -4,16 +4,21 @@ import { Toaster, toast } from 'react-hot-toast'
 import { FaTrash, FaCheck, FaSearch } from 'react-icons/fa'
 import './App.css'
 
+
 function App() {
 
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [isLogIn, setIsLogIn]= useState(false);
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [isLogIn, setIsLogIn]= useState( false );
+  const [currentUser, setCurrentUser]= useState(() => { 
+    const currentUserState= localStorage.getItem('currentUser')
+    return currentUserState != null? JSON.parse(currentUserState): null
+  });
+  
   const [formData, setFormData] = useState({
     name: '',
     password: ''
   });
-  const [currentUser, setCurrentUser] = useState('');
-
+  
   
   const [todos, setTodos] = useState([])
   const [text, setText] = useState('')
@@ -23,9 +28,25 @@ function App() {
   
 
   useEffect(() => {
+  
+  if (currentUser != null){
+   localStorage.setItem('currentUser', JSON.stringify(currentUser))
+  console.log(currentUser)
+    
+    setIsLogIn(false);
+    setIsSignUp(true);
+      
+  }
+  if(currentUser== null){
+   console.log(currentUser)
+      
+  }
+   
+    
   if(isSignUp && !isLogIn){
     fetchTodos(currentUser)
   }
+  
   }, [currentUser, isLogIn]);
 
   const handleSignUp = async (e) => {
@@ -60,8 +81,6 @@ function App() {
         setIsLogIn(false);
         setIsSignUp(true);
         setCurrentUser(findUser.data.id);
-
-        
 
        
         }catch(error){
@@ -298,6 +317,15 @@ function App() {
           Add
         </button>
       </div>
+      <button  onClick= {() => 
+             { setIsLogIn(true);
+              setIsSignUp(false);
+              setCurrentUser(null);
+              localStorage.removeItem('currentUser');
+              
+             
+            }}
+            >logout</button>
     
     <div className="flex mb-4">
         
