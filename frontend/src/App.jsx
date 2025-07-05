@@ -1,392 +1,47 @@
-import { useState, useEffect } from 'react'
-import axios from 'axios'
-import { Toaster, toast } from 'react-hot-toast'
-import { FaTrash, FaCheck, FaSearch } from 'react-icons/fa'
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom' ;
+import SignupPage from './components/signupPage';
+import TodoPage from './components/todoPage';
 import './App.css'
 
 
 function App() {
 
-  const [isSignUp, setIsSignUp] = useState(true)
-  const [isLogIn, setIsLogIn]= useState( true );
-  const [currentUser, setCurrentUser]= useState(() => { 
+    const [currentUser, setCurrentUser]= useState(() => { 
     const currentUserState= localStorage.getItem('currentUser')
     return currentUserState != null? JSON.parse(currentUserState): null
   });
   
-  const [formData, setFormData] = useState({
-    name: '',
-    password: ''
-  });
-  
-  
-  const [todos, setTodos] = useState([])
-  const [text, setText] = useState('')
-  const [searchText, setSearchText] = useState('')
-  const [updateText, setUpdateText] = useState('')
-  const [editID, setEditId] = useState('')
-  
-
   useEffect(() => {
   
-  if (currentUser != null){
-   localStorage.setItem('currentUser', JSON.stringify(currentUser))
-  console.log(currentUser)
-    
-    setIsLogIn(false);
-    setIsSignUp(false);
-      
-  }
-  if(currentUser== null){
-   console.log(currentUser)
-      
+  if(currentUser == null){
+    console.log("currentUser is null")
   }
    
-    
-  if(isSignUp && !isLogIn){
-    fetchTodos(currentUser)
+  if (currentUser != null){
+   console.log("currnet user find")
+   console.log(currentUser)
+   
   }
-  
-  }, [currentUser, isLogIn]);
-
-  const handleSignUp = async (e) => {
-        e.preventDefault();
-       try {
-        
-       const signUp= await axios.post('http://localhost:5000/api/todos/account/signup', 
-        formData
-        );
-        const new_id= signUp.data.id;
-        //not 
-         //console.log(new_id);
-         
-         setIsSignUp(false);
-        setCurrentUser(new_id);
-        
-        } catch (error) {
-        console.log(error);
-       }
-  }
-
-  const handleLogIn = async (e) => {
-    
-    e.preventDefault(); //  to prevent page reload
-       
-       
-      try{
-        toast.success('login call ')
-        
-        const findUser = await axios.post('http://localhost:5000/api/todos/account/login', {checkUserPassword: formData.password})
-        console.log("comeIn")
-         setCurrentUser(findUser.data.id);
-
-       
-        }catch(error){
-          toast.error(error)
-    }
-    
-  };
  
-  const fetchTodos = async (findUserById) => {
-    try {
-      toast.success('fetching id_user');
-      
-      const response = await axios.get('http://localhost:5000/api/todos',{
-       params : {logInUser: findUserById}
-      })
-      setTodos(response.data)
-    } catch (error) {
-      toast.error('Failed to fetch todos')
-    }
-  }
-
-  const fetchCompletedTodos = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/todos/completed')
-      setTodos(response.data)
-    } catch (error) {
-      toast.error('Failed to fetch completed todos')
-    }
-  }
-
-  const updateTodo = async (id, updateText) => {
-    try {
-      const response = await axios.put(`http://localhost:5000/api/todos/${id}`, {
-        text: updateText
-      })
-       setTodos(prevTodos => 
-      prevTodos.map(todo => 
-        todo._id === id ? response.data : todo
-      )
-    );
-     toast.success('Todo updated');
- 
-    } catch (error) {
-      toast.error('Failed to fetch completed todos')
-    }
-  }
-
-  const addTodo = async () => {
-    if (!text.trim()) {
-      toast.error('Todo text cannot be empty')
-      return
-    }
-    toast.success('Todo adding')
-    
-    try {
-      const response = await axios.post('http://localhost:5000/api/todos', { 
-         userText: text,
-         u_Id: currentUser
-       })
-        toast.success('Todo adding')
-
-      setTodos([...todos, response.data])
-      setText('')
-      toast.success('Todo added successfully')
-    } catch (error) {
-      toast.error('Failed to add todo')
-    }
-  }
-
-  const searchTodos = async () => {
-    if (!searchText.trim()) {
-      fetchTodos()
-      return
-    }
-    
-    try {
-      const response = await axios.get('http://localhost:5000/api/todos/searchToDo', {
-        params: { q: searchText }
-      })
-      setTodos(response.data)
-    } catch (error) {
-      toast.error('Failed to search todos')
-    }
-  }
-
-  const toggleTodo = async (id) => {
-    try {
-      const todo = todos.find(t => t._id === id)
-      const response = await axios.put(`http://localhost:5000/api/todos/${id}`, {
-        completed: !completed
-      })
-      setTodos(todos.map(t => t._id === id ? response.data : t))
-      toast.success('Todo updated')
-    } catch (error) {
-      toast.error('Failed to update todo')
-    }
-  }
-
-  const deleteTodo = async (id) => {
-    try {
-      await axios.delete(`http://localhost:5000/api/todos/${id}`)
-      setTodos(todos.filter(t => t._id !== id))
-      toast.success('Todo deleted')
-    } catch (error) {
-      toast.error('Failed to delete todo')
-    }
-  }
   
-  if (isSignUp) {
-    return (
-      <div className="container mx-auto p-4 max-w-md">
-       
-        <div className="container mx-auto p-4 max-w-md">
-        <Toaster position="top-right" />
-        <h1 className="text-2xl font-bold mb-4">Signup page</h1>
-        <form onSubmit={handleSignUp} className="space-y-4">
-            <div>
-              <label className="block mb-1">Name:</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full p-2 border rounded"
-                required
-              />
-              
-            </div>
-             <div>
-              <label className="block mb-1">Password:</label>
-              <input
-                type="text"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                className="w-full p-2 border rounded"
-                required
-              />
-              
-            </div>
+  }, [currentUser]);
+
+   return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element= {currentUser? <Navigate to="/todo" />: <Navigate to="/signup" />}/>
+        <Route path="/signup" element={<SignupPage currentUser = {currentUser} setCurrentUser={setCurrentUser} />} />
+        <Route path="/todo" element={
+          <TodoPage currentUser={currentUser} setCurrentUser={setCurrentUser} /> 
             
-            <button
-              type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition"
-            >
-              Sign Up
-            </button>
-            
-            
-          </form>
-           <button
-            onClick= {() => 
-             { 
-              setIsSignUp(false);
-            }}
-            >Have An Account</button>
-        </div>
-       
-      </div>
-    );
-  }
-
-
-  if (isLogIn) {
-    return (
-      <div className="container mx-auto p-4 max-w-md">
-       
-        <div className="container mx-auto p-4 max-w-md">
-        <Toaster position="top-right" />
-        <h1 className="text-2xl font-bold mb-4">Login page</h1>
-        <form onSubmit={handleLogIn} className="space-y-4">
-            
-            <div>
-              <label className="block mb-1">Password:</label>
-              <input
-                type="text"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                className="w-full p-2 border rounded"
-                required
-              />
-              
-            </div>
-            
-            <button
-              type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition"
-            >
-              LogIn...
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-
-
-  return (
-    <div className="container mx-auto p-4 max-w-md">
-      
-      <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold mb-4">ToDo List</h1>
-      
-      
-      <div className="flex mb-4">
-        <input
-          type="text"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          placeholder="Search tasks..."
-          className="flex-1 p-2 border rounded-l"
-          onKeyPress={(e) => e.key === 'Enter' && searchTodos()}
-        />
-        <button 
-          onClick={searchTodos}
-          className="bg-gray-500 text-white p-2 rounded-r hover:bg-gray-600 flex items-center"
-        >
-          <FaSearch />
-        </button>
-      </div>
-
-      <div className="flex mb-4">
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Add a new task..."
-          className="flex-1 p-2 border rounded-l"
-          onKeyPress={(e) => e.key === 'Enter' && addTodo()}
-        />
-        <button 
-          onClick={addTodo}
-          className="bg-blue-500 text-white p-2 rounded-r hover:bg-blue-600"
-        >
-          Add
-        </button>
-      </div>
-      <button  onClick= {() => 
-             { 
-              setIsSignUp(true)
-              setCurrentUser(null);
-              localStorage.removeItem('currentUser');
-              
-             
-            }}
-            >logout</button>
-    
-    <div className="flex mb-4">
-        
-        <button 
-          onClick={fetchCompletedTodos}
-          className=" text-white p-2 rounded "
-        >
-          Completed
-        </button>
-      </div>
-
-      
-
-      <ul className="space-y-2">
-        {todos.length === 0 ? (
-          <li className="p-3 text-center text-gray-500">No todos found</li>
-        ) : (
-          todos.map(todo => (
-            <li 
-              key={todo._id} 
-              className={`flex items-center p-3 border rounded ${todo.completed ? 'bg-gray-100' : 'bg-white'}`}
-            >
-                {todo.text}
-                {editID === todo._id  ? (
-                   <input
-          type="text"
-          value={updateText}
-          onChange={(e) => setUpdateText(e.target.value)}
-          placeholder="Add task to update..."
-          className="flex-1 p-2 border rounded-l"
-          onKeyPress={(e) => e.key === 'Enter' && updateTodo(todo._id, updateText)}
-        />
-                ):(
-                   
-              
-              <div className="flex space-x-4">
-                <button
-                  onClick={() => toggleTodo(todo._id)}
-                  className={`p-1 rounded ${todo.completed ? 'bg-green-500' : 'bg-gray-300'} text-white`}
-                >
-                  <FaCheck />
-                </button>
-                 <button 
-                 onClick= {() => setEditId(todo._id)}
-                 >Update</button>
-                 
-                <button
-                  onClick={() => deleteTodo(todo._id)}
-                  className="p-1 bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                  <FaTrash />
-                </button>
-              </div>
-                )}
-            </li>
-          ))
-        )}
-      </ul>
-
-    </div>
-      
-    
+        }/>
+      </Routes>
+    </BrowserRouter>
   );
+  
+
+  
 }
 
 export default App

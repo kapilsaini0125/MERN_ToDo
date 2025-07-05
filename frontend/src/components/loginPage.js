@@ -1,5 +1,6 @@
 
-function loginPage(){
+import './App.css';
+function LoginPage({setCurrentUser}){
 
 const [formData, setFormData] = useState({
     password: ''
@@ -56,4 +57,4 @@ const handleLogIn = async (e) => {
 }
 }
 
-export default loginPage
+export default LoginPage

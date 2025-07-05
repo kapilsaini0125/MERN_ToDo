@@ -1,3 +1,25 @@
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import { Toaster, toast } from 'react-hot-toast'
+import { FaTrash, FaCheck, FaSearch } from 'react-icons/fa'
+import './App.css'
+
+
+function App() {
+
+  const [isSignUp, setIsSignUp] = useState(true)
+  const [isLogIn, setIsLogIn]= useState( true );
+  const [currentUser, setCurrentUser]= useState(() => { 
+    const currentUserState= localStorage.getItem('currentUser')
+    return currentUserState != null? JSON.parse(currentUserState): null
+  });
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    password: ''
+  });
+  
+  
   const [todos, setTodos] = useState([])
   const [text, setText] = useState('')
   const [searchText, setSearchText] = useState('')
@@ -5,7 +27,67 @@
   const [editID, setEditId] = useState('')
   
 
-const fetchTodos = async (findUserById) => {
+  useEffect(() => {
+  
+  if (currentUser != null){
+   localStorage.setItem('currentUser', JSON.stringify(currentUser))
+  console.log(currentUser)
+    
+    setIsLogIn(false);
+    setIsSignUp(false);
+      
+  }
+  if(currentUser== null){
+   console.log(currentUser)
+      
+  }
+   
+    
+  if(isSignUp && !isLogIn){
+    fetchTodos(currentUser)
+  }
+  
+  }, [currentUser, isLogIn]);
+
+  const handleSignUp = async (e) => {
+        e.preventDefault();
+       try {
+        
+       const signUp= await axios.post('http://localhost:5000/api/todos/account/signup', 
+        formData
+        );
+        const new_id= signUp.data.id;
+        //not 
+         //console.log(new_id);
+         
+         setIsSignUp(false);
+        setCurrentUser(new_id);
+        
+        } catch (error) {
+        console.log(error);
+       }
+  }
+
+  const handleLogIn = async (e) => {
+    
+    e.preventDefault(); //  to prevent page reload
+       
+       
+      try{
+        toast.success('login call ')
+        
+        const findUser = await axios.post('http://localhost:5000/api/todos/account/login', {checkUserPassword: formData.password})
+        console.log("comeIn")
+         setCurrentUser(findUser.data.id);
+
+       
+        }catch(error){
+          toast.error(error)
+    }
+    
+  };
+ 
+  const fetchTodos = async (findUserById) => {
     try {
       toast.success('fetching id_user');
       
@@ -103,8 +185,96 @@ const fetchTodos = async (findUserById) => {
     } catch (error) {
       toast.error('Failed to delete todo')
     }
+  }
   
-  
+  if (isSignUp) {
+    return (
+      <div className="container mx-auto p-4 max-w-md">
+       
+        <div className="container mx-auto p-4 max-w-md">
+        <Toaster position="top-right" />
+        <h1 className="text-2xl font-bold mb-4">Signup page</h1>
+        <form onSubmit={handleSignUp} className="space-y-4">
+            <div>
+              <label className="block mb-1">Name:</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                className="w-full p-2 border rounded"
+                required
+              />
+              
+            </div>
+             <div>
+              <label className="block mb-1">Password:</label>
+              <input
+                type="text"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                className="w-full p-2 border rounded"
+                required
+              />
+              
+            </div>
+            
+            <button
+              type="submit"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition"
+            >
+              Sign Up
+            </button>
+            
+            
+          </form>
+           <button
+            onClick= {() => 
+             { 
+              setIsSignUp(false);
+            }}
+            >Have An Account</button>
+        </div>
+       
+      </div>
+    );
+  }
+
+
+  if (isLogIn) {
+    return (
+      <div className="container mx-auto p-4 max-w-md">
+       
+        <div className="container mx-auto p-4 max-w-md">
+        <Toaster position="top-right" />
+        <h1 className="text-2xl font-bold mb-4">Login page</h1>
+        <form onSubmit={handleLogIn} className="space-y-4">
+            
+            <div>
+              <label className="block mb-1">Password:</label>
+              <input
+                type="text"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                className="w-full p-2 border rounded"
+                required
+              />
+              
+            </div>
+            
+            <button
+              type="submit"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition"
+            >
+              LogIn...
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+
+
   return (
     <div className="container mx-auto p-4 max-w-md">
       
@@ -150,9 +320,10 @@ const fetchTodos = async (findUserById) => {
               setIsSignUp(true)
               setCurrentUser(null);
               localStorage.removeItem('currentUser');
-             }
-            }
-            >Log Out</button>
+              
+             
+            }}
+            >logout</button>
     
     <div className="flex mb-4">
         
@@ -218,4 +389,4 @@ const fetchTodos = async (findUserById) => {
   );
 }
 
-export default todoPage
+export default App
