@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { Toaster } from 'react-hot-toast'; 
 
-function SignupPage({currentUser, setCurrentUser }) {
+function SignupPage({ setCurrentUser }) {
   const [formData, setFormData] = useState({
     name: '',
     password: ''
@@ -13,10 +12,11 @@ function SignupPage({currentUser, setCurrentUser }) {
     try {
       const signUp = await axios.post('http://localhost:5000/api/todos/account/signup', formData);
       const new_id = signUp.data.id;
+       localStorage.setItem('currentUser', JSON.stringify(new_id))
+      setCurrentUser(true);
+      
+      
      
-      localStorage.setItem('currentUser', JSON.stringify(currentUser))
-  
-      setCurrentUser(new_id);
     } catch (error) {
       console.log(error);
     }
@@ -25,7 +25,6 @@ function SignupPage({currentUser, setCurrentUser }) {
   return (
     <div className="container mx-auto p-4 max-w-md">
       <div className="container mx-auto p-4 max-w-md">
-        <Toaster position="top-right" />
         <h1 className="text-2xl font-bold mb-4">Signup page</h1>
         <form onSubmit={handleSignUp} className="space-y-4">
           <div>

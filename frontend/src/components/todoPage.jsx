@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { Toaster, toast } from 'react-hot-toast';
 
   function TodoPage({ currentUser, setCurrentUser}) {
 
@@ -13,14 +12,13 @@ import { Toaster, toast } from 'react-hot-toast';
 
 const fetchTodos = async (findUserById) => {
     try {
-      toast.success('fetching id_user');
-      
+     
       const response = await axios.get('http://localhost:5000/api/todos',{
        params : {logInUser: findUserById}
       })
       setTodos(response.data)
     } catch (error) {
-      toast.error('Failed to fetch todos')
+      console.error('Failed to fetch todos')
     }
   }
 
@@ -29,7 +27,7 @@ const fetchTodos = async (findUserById) => {
       const response = await axios.get('http://localhost:5000/api/todos/completed')
       setTodos(response.data)
     } catch (error) {
-      toast.error('Failed to fetch completed todos')
+      console.error('Failed to fetch completed todos')
     }
   }
 
@@ -43,32 +41,27 @@ const fetchTodos = async (findUserById) => {
         todo._id === id ? response.data : todo
       )
     );
-     toast.success('Todo updated');
- 
+    
     } catch (error) {
-      toast.error('Failed to fetch completed todos')
+      console.error('Failed to fetch completed todos')
     }
   }
 
   const addTodo = async () => {
     if (!text.trim()) {
-      toast.error('Todo text cannot be empty')
       return
     }
-    toast.success('Todo adding')
-    
+   
     try {
       const response = await axios.post('http://localhost:5000/api/todos', { 
          userText: text,
          u_Id: currentUser
        })
-        toast.success('Todo adding')
-
+       
       setTodos([...todos, response.data])
       setText('')
-      toast.success('Todo added successfully')
-    } catch (error) {
-      toast.error('Failed to add todo')
+      } catch (error) {
+      console.error('Failed to add todo')
     }
   }
 
@@ -84,7 +77,7 @@ const fetchTodos = async (findUserById) => {
       })
       setTodos(response.data)
     } catch (error) {
-      toast.error('Failed to search todos')
+      console.error('Failed to search todos')
     }
   }
 
@@ -95,9 +88,8 @@ const fetchTodos = async (findUserById) => {
         completed: !completed
       })
       setTodos(todos.map(t => t._id === id ? response.data : t))
-      toast.success('Todo updated')
-    } catch (error) {
-      toast.error('Failed to update todo')
+      } catch (error) {
+      console.error('Failed to update todo')
     }
   }
 
@@ -105,16 +97,14 @@ const fetchTodos = async (findUserById) => {
     try {
       await axios.delete(`http://localhost:5000/api/todos/${id}`)
       setTodos(todos.filter(t => t._id !== id))
-      toast.success('Todo deleted')
-    } catch (error) {
-      toast.error('Failed to delete todo')
+      } catch (error) {
+      console.error('Failed to delete todo')
     }
   }
   
   return (
     <div className="container mx-auto p-4 max-w-md">
       
-      <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">ToDo List</h1>
       
       
@@ -131,7 +121,7 @@ const fetchTodos = async (findUserById) => {
           onClick={searchTodos}
           className="bg-gray-500 text-white p-2 rounded-r hover:bg-gray-600 flex items-center"
         >
-          <FaSearch />
+          
         </button>
       </div>
 
@@ -153,9 +143,8 @@ const fetchTodos = async (findUserById) => {
       </div>
       <button  onClick= {() => 
              { 
-              
-              setCurrentUser(null);
               localStorage.removeItem('currentUser');
+              setCurrentUser(true);
              }
             }
             >Log Out</button>
@@ -199,8 +188,7 @@ const fetchTodos = async (findUserById) => {
                   onClick={() => toggleTodo(todo._id)}
                   className={`p-1 rounded ${todo.completed ? 'bg-green-500' : 'bg-gray-300'} text-white`}
                 >
-                  <FaCheck />
-                </button>
+                  </button>
                  <button 
                  onClick= {() => setEditId(todo._id)}
                  >Update</button>
@@ -209,8 +197,7 @@ const fetchTodos = async (findUserById) => {
                   onClick={() => deleteTodo(todo._id)}
                   className="p-1 bg-red-500 text-white rounded hover:bg-red-600"
                 >
-                  <FaTrash />
-                </button>
+                 </button>
               </div>
                 )}
             </li>
