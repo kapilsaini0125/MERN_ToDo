@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 
 function SignupPage({ setCurrentUser }) {
+  const navigate= useNavigate();
+  
   const [formData, setFormData] = useState({
     name: '',
     password: ''
@@ -13,10 +17,9 @@ function SignupPage({ setCurrentUser }) {
       const signUp = await axios.post('http://localhost:5000/api/todos/account/signup', formData);
       const new_id = signUp.data.id;
        localStorage.setItem('currentUser', JSON.stringify(new_id))
-      setCurrentUser(true);
-      
-      
-     
+      setCurrentUser(new_id);
+      navigate('/todo')
+           
     } catch (error) {
       console.log(error);
     }
@@ -54,7 +57,15 @@ function SignupPage({ setCurrentUser }) {
             Sign Up
           </button>
         </form>
+        <button
+            onClick= {() => 
+             { 
+              navigate('/login');
+            }}
+            >Have An Account</button>
       </div>
+        
+    
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-  function TodoPage({ currentUser, setCurrentUser}) {
+function TodoPage({ currentUser, setCurrentUser}) {
 
+  const navigate = useNavigate();
   const [todos, setTodos] = useState([])
   const [text, setText] = useState('')
   const [searchText, setSearchText] = useState('')
@@ -144,9 +146,12 @@ const fetchTodos = async (findUserById) => {
       <button  onClick= {() => 
              { 
               localStorage.removeItem('currentUser');
-              setCurrentUser(true);
+              setCurrentUser(null);
+              navigate('/signup')
+           
              }
             }
+            
             >Log Out</button>
     
     <div className="flex mb-4">

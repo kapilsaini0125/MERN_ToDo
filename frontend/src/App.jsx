@@ -9,33 +9,42 @@ import './App.css'
 function App() {
 
     const [currentUser, setCurrentUser]= useState(() => { 
-    const currentUserState= localStorage.getItem('currentUser')
-    console.log("local storage", currentUserState)
-    return currentUserState? JSON.parse(currentUserState): null
+    const currentUserState = localStorage.getItem('currentUser')
+    return currentUserState != null ? JSON.parse(currentUserState) : null
   });
-  
+    const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
-  if(currentUser == null){
-    console.log("currentUser is null")
-  }
-  if (currentUser ){
-   console.log("currnet user find")
-   console.log(currentUser)
-  }
+      console.log("currentUser", currentUser);
+     
+    if(currentUser){
+       setIsLoading(false);
+      }else{
+      setIsLoading(false);
+    }
   }, [currentUser]);
 
-   return (
+  if(isLoading){
+    return (
+    <div className="loading">
+      <h1>
+        Loading...
+      </h1>
+
+  </div>
+  )
+  }
+   
+    return (
     <BrowserRouter>
       <Routes>
          <Route path="/" element={currentUser ? <Navigate to="/todo" /> : <Navigate to="/signup" />} />
          <Route path="/signup" element={<SignupPage setCurrentUser={setCurrentUser} />} />
+         <Route path="/login" element={<LoginPage setCurrentUser={setCurrentUser} />} />
          <Route path="/todo" element={<TodoPage currentUser={currentUser} setCurrentUser={setCurrentUser} />} />
       </Routes>
     </BrowserRouter>
   );
-  
-
-  
+   
 }
 
 export default App

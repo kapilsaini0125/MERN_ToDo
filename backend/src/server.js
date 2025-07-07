@@ -68,7 +68,7 @@ app.post('/api/todos/account/login', async (req, res) => {
   if(!logInUser){
     console.log("user not match");
   
-    res.json({success: false, error: "Invalid details"} );
+    res.json(null );
     }
 
     res.json({id: logInUser._id})

@@ -1,6 +1,10 @@
 
 import React, { useState } from 'react'; 
+import axios from 'axios';
+import {useNavigate} from 'react-router-dom'
+
 function LoginPage({setCurrentUser}){
+const navigate= useNavigate();
 
 const [formData, setFormData] = useState({
     password: ''
@@ -12,23 +16,28 @@ const handleLogIn = async (e) => {
        
        
       try{
-        toast.success('login call ')
-        
+       
         const findUser = await axios.post('http://localhost:5000/api/todos/account/login', {checkUserPassword: formData.password})
         console.log("comeIn")
-         setCurrentUser(findUser.data.id);
-
+        
+        setCurrentUser(findUser.data.id);
+        if(findUser)
+          {
+            navigate('/todo')
+          }
+        else{
+          navigate('/signup');
+        }
        
         }catch(error){
-          toast.error(error)
+          console.error(error)
     }
-    
+  }
 
   return (
       <div className="container mx-auto p-4 max-w-md">
        
         <div className="container mx-auto p-4 max-w-md">
-        <Toaster position="top-right" />
         <h1 className="text-2xl font-bold mb-4">Login page</h1>
         <form onSubmit={handleLogIn} className="space-y-4">
             
@@ -45,8 +54,10 @@ const handleLogIn = async (e) => {
             </div>
             
             <button
+              
               type="submit"
               className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition"
+              
             >
               LogIn...
             </button>
@@ -54,7 +65,7 @@ const handleLogIn = async (e) => {
         </div>
       </div>
     );
-}
+
 }
 
 export default LoginPage
