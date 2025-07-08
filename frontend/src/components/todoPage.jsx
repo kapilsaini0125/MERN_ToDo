@@ -2,27 +2,18 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-function TodoPage({ currentUser, setCurrentUser}) {
+
+function TodoPage({ currentUser, setCurrentUser, todos, setTodos}) {
 
   const navigate = useNavigate();
-  const [todos, setTodos] = useState([])
   const [text, setText] = useState('')
   const [searchText, setSearchText] = useState('')
   const [updateText, setUpdateText] = useState('')
   const [editID, setEditId] = useState('')
   
+  
 
-const fetchTodos = async (findUserById) => {
-    try {
-     
-      const response = await axios.get('http://localhost:5000/api/todos',{
-       params : {logInUser: findUserById}
-      })
-      setTodos(response.data)
-    } catch (error) {
-      console.error('Failed to fetch todos')
-    }
-  }
+
 
   const fetchCompletedTodos = async () => {
     try {

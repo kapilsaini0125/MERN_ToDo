@@ -18,10 +18,10 @@ const handleLogIn = async (e) => {
       try{
        
         const findUser = await axios.post('http://localhost:5000/api/todos/account/login', {checkUserPassword: formData.password})
-        console.log("comeIn")
-        
+        console.log(findUser.data.id)
+        localStorage.setItem('currentUser',JSON.stringify(findUser.data.id))
         setCurrentUser(findUser.data.id);
-        if(findUser)
+        if(findUser.data.id!= null)
           {
             navigate('/todo')
           }

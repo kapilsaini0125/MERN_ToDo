@@ -66,12 +66,10 @@ app.post('/api/todos/account/login', async (req, res) => {
   console.log( logInUser)
   
   if(!logInUser){
-    console.log("user not match");
-  
-    res.json(null );
+    res.json( {id: null});
     }
 
-    res.json({id: logInUser._id})
+    res.json( {id: logInUser._id})
   console.log("sending id to frontend: " ); 
 } 
 catch(error){
